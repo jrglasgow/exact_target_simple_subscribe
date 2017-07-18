@@ -1,0 +1,7 @@
+name = "Exact Target Simple Subscribe"
+description = "Provides simple blocks for a site user to subscribe to one or more Exact Target (SalesForce Marketing Cloud) lists."
+core=7.x
+package=Other
+dependencies[] = block
+dependencies[] = ctools
+dependencies[] = exact_target_api (7.x-2.x)

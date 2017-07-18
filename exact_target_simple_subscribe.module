@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ *
+ * Provides simple blocks for a site user to subscribe to one or more Exact
+ * Target (SalesForce Marketing Cloud) lists.
+ */
+
+// Off-load the following infrequently called hooks to another file.
+function exact_target_simple_subscribe_block_info() {
+  module_load_include('inc', 'exact_target_simple_subscribe', 'exact_target_simple_subscribe.admin');
+  return _exact_target_simple_subscribe_block_info();
+}
+function exact_target_simple_subscribe_block_configure($delta = '') {
+  module_load_include('inc', 'exact_target_simple_subscribe', 'exact_target_simple_subscribe.admin');
+  return _exact_target_simple_subscribe_block_configure($delta);
+}
+function exact_target_simple_subscribe_block_save($delta = '', $edit = array()) {
+  module_load_include('inc', 'exact_target_simple_subscribe', 'exact_target_simple_subscribe.admin');
+  return _exact_target_simple_subscribe_block_save($delta, $edit);
+}
+
+/**
+ * Implements hook_block_view
+ */
+function exact_target_simple_subscribe_block_view($delta) {
+  module_load_include('inc', 'exact_target_simple_subscribe', 'exact_target_simple_subscribe.admin');
+  return _exact_target_simple_subscribe_block_view($delta);
+}
+
+/**
+ * Implements hook_menu().
+ */
+function exact_target_simple_subscribe_menu() {
+  $items['admin/structure/block/add-etss-block'] = array(
+    'title' => 'Add Simple Subscribe block',
+    'description' => 'Add a new Exact Target Simple Subscribe block to allow users to subscribe to mailing lists.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('exact_target_simple_subscribe_add_block_form'),
+    'access arguments' => array('administer exact target simple subscribe blocks'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'exact_target_simple_subscribe.admin.inc',
+  );
+  $default_theme = variable_get('theme_default', 'bartik');
+  foreach (list_themes() as $key => $theme) {
+    if ($key != $default_theme) {
+      $items['admin/structure/block/list/' . $key . '/add-etss-block'] = array(
+        'title' => 'Add Simple Subscribe block',
+        'description' => 'Add a new menu block.',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('exact_target_simple_subscribe_add_block_form', 4),
+        'access arguments' => array('administer exact target simple subscribe blocks'),
+        'type' => MENU_LOCAL_ACTION,
+        'file' => 'exact_target_simple_subscribe.admin.inc',
+      );
+    }
+  }
+  $items['admin/structure/block/manage/exact_target_simple_subscribe/%/delete'] = array(
+    'title' => 'Delete Simple Subscribe block',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('exact_target_simple_subscribe_delete_form', 5),
+    'access arguments' => array('administer exact target simple subscribe blocks'),
+    'type' => MENU_CALLBACK,
+    'file' => 'exact_target_simple_subscribe.admin.inc',
+  );
+
+  $items['ajax/etss_subscribe/%ctools_js/%'] = array(
+      'title' => 'Subscribe',
+      'page arguments' => array(2, 3),
+      'page callback' => 'exact_target_simple_subscribe_modal_page',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+      'file' => 'exact_target_simple_subscribe.pages.inc',
+  );
+  
+  return $items;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function exact_target_simple_subscribe_permission() {
+  return array(
+    'administer exact target simple subscribe blocks' => array(
+      'title' => t('Administrer Simple Subscribe Blocks'),
+      'description' => t('Create/Edit/Delete Exact Target Simple Subscribe blocks.'),
+    ),
+  );
+}
+
+/**
+ * Imlpements hook_form_FORM_ID_alter().
+ *
+ * alter the block_admin_display_form to add delete links for this module's blocks
+ */
+function exact_target_simple_subscribe_form_block_admin_display_form_alter(&$form, &$form_state) {
+  $config = variable_get('exact_target_simple_subscribe_blocks', array());
+  foreach ($config AS $delta => $block) {
+    $form['blocks']['exact_target_simple_subscribe_' . $delta]['delete'] = array(
+      '#type' => 'link',
+      '#title' => t('delete'),
+      '#href' => 'admin/structure/block/manage/exact_target_simple_subscribe/' . $delta . '/delete',
+    );
+  }
+}

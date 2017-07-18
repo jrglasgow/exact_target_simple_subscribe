@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ *
+ * Install hooks
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function exact_target_simple_subscribe_uninstall() {
+  variable_del('exact_target_simple_subscribe_blocks');
+
+  // Remove block configurations.
+  foreach (array('block', 'block_node_type', 'block_role') as $table) {
+    if (db_table_exists($table)) {
+      db_delete($table)
+        ->condition('module', 'exact_target_simple_subscribe')
+        ->execute();
+    }
+  }
+}
